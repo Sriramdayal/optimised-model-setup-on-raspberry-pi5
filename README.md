@@ -73,14 +73,4 @@ This script is for live demonstrations. It shows a camera feed and uses a keyboa
   python demo.py
   ```
 
-### Running the Field Deployment Script
-
-This script is for real-world use. It uses a PIR motion sensor to automatically trigger detection.
-
-- **Prerequisite:** Ensure your PIR sensor is correctly wired to the GPIO pins.
-- **Command:**
-  ```bash
-  python demo.py
-  ```
-
 ---
