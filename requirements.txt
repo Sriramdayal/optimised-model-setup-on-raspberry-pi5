@@ -1,0 +1,15 @@
+# requirements.txt
+
+# Core ML/AI Libraries for YOLOv8 and ONNX
+ultralytics>=8.1.0
+onnxruntime>=1.16.0
+
+# Image & Video Processing
+# The headless version is lighter and ideal for a device without a screen (like a deployed Pi)
+opencv-python-headless>=4.8.0
+
+# Raspberry Pi Specific Library for GPIO control
+RPi.GPIO>=0.7.1
+
+# Numerical Operations (often installed as a dependency, but good practice to list)
+numpy>=1.24.0
