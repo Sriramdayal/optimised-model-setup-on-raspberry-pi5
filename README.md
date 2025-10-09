@@ -70,7 +70,7 @@ This script is for live demonstrations. It shows a camera feed and uses a keyboa
 - **Controls:** Press `d` to detect trash, `q` to quit.
 - **Command:**
   ```bash
-  python presentation_demo_optimized.py
+  python demo.py
   ```
 
 ### Running the Field Deployment Script
