@@ -30,7 +30,8 @@ These steps will guide you through setting up the project from a fresh Raspberry
 - Clone the project files into a local directory.
   ```bash
   # Example command, replace with your repository URL if you use Git
-  # git clone [https://your-repository-url.com/project.git](https://your-repository-url.com/project.git)
+  sudo apt install git
+  git clone https://github.com/Sriramdayal/optimised-model-setup-on-raspberry-pi5.git
   # cd project/
   
   # If not using Git, simply create a project folder
