@@ -34,8 +34,8 @@ These steps will guide you through setting up the project from a fresh Raspberry
   # cd project/
   
   # If not using Git, simply create a project folder
-  mkdir gmc_garbage_detector
-  cd gmc_garbage_detector
+  mkdir garbage_detector
+  cd garbage_detector
   ```
 
 ### 3. Set Up the Python Environment
@@ -57,7 +57,7 @@ These steps will guide you through setting up the project from a fresh Raspberry
 ### 5. Add the Optimized Model
 
 - This project requires your custom-trained and optimized YOLOv8 model.
-- Place your **`best.onnx`** file into the main project directory (e.g., inside `gmc_garbage_detector/`).
+- Place your **`best.onnx`** file into the main project directory.
 
 ## Running the System
 
@@ -80,7 +80,7 @@ This script is for real-world use. It uses a PIR motion sensor to automatically 
 - **Prerequisite:** Ensure your PIR sensor is correctly wired to the GPIO pins.
 - **Command:**
   ```bash
-  python detector.py
+  python demo.py
   ```
 
 ---
