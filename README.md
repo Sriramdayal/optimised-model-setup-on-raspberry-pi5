@@ -8,7 +8,7 @@ This project provides a complete solution for detecting illegal garbage dumping 
 - **Power Supply:** A high-quality USB-C 5V/3A (for Pi 4) or 5V/5A (for Pi 5) power supply.
 - **MicroSD Card:** 32GB or larger, Class 10/U3 A2, high-endurance card.
 - **Camera Module:** Raspberry Pi Camera Module 2, 3, or HQ Camera.
-- **(For Deployment):** A PIR Motion Sensor (e.g., HC-SR501)
+- **(For Deployment):** A PIR Motion Sensor (e.g., HC-SR501).
 
 ## Setup Instructions
 
