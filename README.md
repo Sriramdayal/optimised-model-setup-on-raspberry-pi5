@@ -203,28 +203,6 @@ This version uses:
 * ✅ Threaded ONNX Runtime on 4 cores
 
 ---
-
-### 🧠 1️⃣ Before you run
-
-Make sure you’ve already done these:
-
-```bash
-sudo apt update
-sudo apt install -y python3-opencv libatlas-base-dev
-pip install onnxruntime onnxsim numpy
-export OMP_NUM_THREADS=4
-```
-
-If your model isn’t yet optimized:
-
-```bash
-pip install onnxsim onnxconverter-common
-python3 -m onnxsim yolov8n.onnx yolov8n_simplified.onnx
-python3 -m onnxconverter_common.float16_converter yolov8n_simplified.onnx yolov8n_fp16.onnx
-```
-
-Then copy `yolov8n_fp16.onnx` to your Raspberry Pi.
-
 ---
 
 ### 🪶 2️⃣ The full optimized camera script
@@ -236,7 +214,7 @@ import onnxruntime as ort
 import time
 
 # --- Config ---
-MODEL_PATH = "yolov8n_fp16.onnx"
+MODEL_PATH = "best_fp16.onnx"
 IMG_SIZE = 320
 CONF_THRESH = 0.4
 IOU_THRESH = 0.45
