@@ -71,10 +71,10 @@ Here’s a **lag-free setup guide** to make inference efficient and real-time (�
 
 ## 🧩 1. Use a Lightweight Model
 
-Pick a smaller variant of YOLOv8 before exporting:
+Pick a smaller variant of YOLOv8 or custom trained model before exporting:
 
 ```bash
-yolo export model=yolov8n.pt format=onnx dynamic=False opset=12
+yolo export model=best.pt format=onnx dynamic=False opset=12
 ```
 
 ✅ `yolov8n` (nano) or `yolov8s` (small) is ideal — large models (`m`, `l`, `x`) are too heavy for Pi 5 CPU.
