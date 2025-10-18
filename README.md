@@ -205,4 +205,3 @@ cv2.destroyAllWindows()
 
 ---
 
-Would you like me to give you a **ready-to-run ONNX camera script** (with YOLOv8 post-processing & bounding boxes) that runs smoothly on Pi 5?
