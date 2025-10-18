@@ -324,4 +324,5 @@ cv2.destroyAllWindows()
 * Disable `cv2.imshow()` for headless streaming — write frames to Flask or MJPEG server.
 
 ---
-
+### NOTE: 
+Edit according to your project use-case from this README.md
