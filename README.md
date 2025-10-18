@@ -8,7 +8,6 @@ This project provides a complete solution for detecting illegal garbage dumping 
 - **Power Supply:** A high-quality USB-C 5V/3A (for Pi 4) or 5V/5A (for Pi 5) power supply.
 - **MicroSD Card:** 32GB or larger, Class 10/U3 A2, high-endurance card.
 - **Camera Module:** Raspberry Pi Camera Module 2, 3, or HQ Camera.
-- **(For Deployment):** A PIR Motion Sensor (e.g., HC-SR501).
 
 ## Setup Instructions
 
@@ -75,3 +74,135 @@ This script is for live demonstrations. It shows a camera feed and uses a keyboa
   ```
 
 ---
+Excellent — deploying **YOLOv8 ONNX** on a **Raspberry Pi 5** can be very smooth ⚡ if you configure it correctly.
+Here’s a **lag-free setup guide** to make inference efficient and real-time (≈ 7–12 FPS with YOLOv8n + 320×320 input).
+
+---
+
+## 🧩 1. Use a Lightweight Model
+
+Pick a smaller variant of YOLOv8 before exporting:
+
+```bash
+yolo export model=yolov8n.pt format=onnx dynamic=False opset=12
+```
+
+✅ `yolov8n` (nano) or `yolov8s` (small) is ideal — large models (`m`, `l`, `x`) are too heavy for Pi 5 CPU.
+
+---
+
+## ⚙️ 2. Install Optimized ONNX Runtime
+
+On the Pi 5 terminal:
+
+```bash
+sudo apt update
+sudo apt install -y python3-opencv libatlas-base-dev
+pip install onnxruntime
+```
+
+If you want **extra speed**, use the **ARM64 OpenBLAS version**:
+
+```bash
+pip uninstall onnxruntime -y
+pip install onnxruntime==1.18.0 --extra-index-url https://download.pytorch.org/whl/cpu
+```
+
+---
+
+## 🧠 3. Optimize the ONNX Model
+
+Use `onnxsim` and `onnxruntime-tools` to simplify:
+
+```bash
+pip install onnxsim onnxruntime-tools
+python3 -m onnxsim best.onnx best_simplified.onnx
+```
+
+Then apply graph optimizations:
+
+```bash
+from onnxruntime_tools import optimizer
+opt_model = optimizer.optimize_model(
+    "best_simplified.onnx", model_type='bert', num_heads=0, hidden_size=0)
+opt_model.save_model_to_file("best_optimized.onnx")
+```
+
+---
+
+## 🚀 4. Use Half-Precision (FP16) Quantization
+
+For faster CPU math and lower RAM:
+
+```bash
+pip install onnxconverter-common
+python3 -m onnxconverter_common.float16_converter best_optimized.onnx best_fp16.onnx
+```
+
+---
+
+## 🖥️ 5. Efficient Inference Code
+
+```python
+import onnxruntime as ort
+import cv2, numpy as np, time
+
+# Load ONNX model
+session = ort.InferenceSession("best_fp16.onnx", providers=['CPUExecutionProvider'])
+
+# Get input/output names
+input_name = session.get_inputs()[0].name
+output_name = session.get_outputs()[0].name
+
+cap = cv2.VideoCapture(0)
+while True:
+    ret, frame = cap.read()
+    if not ret: break
+
+    t1 = time.time()
+    img = cv2.resize(frame, (320, 320))
+    img = img.transpose(2, 0, 1)[None].astype(np.float32) / 255.0
+
+    outputs = session.run([output_name], {input_name: img})
+    fps = 1 / (time.time() - t1)
+    cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+    cv2.imshow("YOLOv8 ONNX", frame)
+    if cv2.waitKey(1) == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+```
+
+⚡ **Expected Performance (Raspberry Pi 5)**
+
+* YOLOv8n (320×320): ~8–12 FPS
+* YOLOv8s: ~5 FPS
+* CPU temp < 60 °C with passive cooling
+
+---
+
+## 🧩 6. Optional Speed Ups
+
+| Optimization               | Description                                                                                        |
+| -------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Thread count**           | `export OMP_NUM_THREADS=4` (Pi 5 has 4 cores)                                                      |
+| **Use OpenCV DNN backend** | `cv2.dnn.readNetFromONNX("best_fp16.onnx")` — sometimes faster                                     |
+| **Disable GUI display**    | Write frames to MJPEG stream instead of showing them                                               |
+| **Use Vulkan**             | Pi 5 supports Vulkan → can build ONNX Runtime with `--use_vulkan` for GPU acceleration (advanced). |
+
+---
+
+✅ **Recommended combo for lag-free inference**
+
+* Model: `yolov8n`
+* Input size: `imgsz=320`
+* Quantized: FP16 or INT8
+* Optimized ONNX (simplified)
+* Threaded ONNX Runtime (4 cores)
+
+---
+
+Would you like me to give you a **ready-to-run ONNX camera script** (with YOLOv8 post-processing & bounding boxes) that runs smoothly on Pi 5?
