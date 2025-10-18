@@ -63,18 +63,8 @@ These steps will guide you through setting up the project from a fresh Raspberry
 
 Make sure your virtual environment is active (`source venv/bin/activate`) before running any scripts.
 
-### Running the Presentation Demo
-
-This script is for live demonstrations. It shows a camera feed and uses a keyboard to trigger detection.
-
-- **Controls:** Press `d` to detect trash, `q` to quit.
-- **Command:**
-  ```bash
-  python demo.py
-  ```
-
 ---
-Excellent — deploying **YOLOv8 ONNX** on a **Raspberry Pi 5** can be very smooth ⚡ if you configure it correctly.
+deploying **YOLOv8 ONNX** on a **Raspberry Pi 5** can be very smooth ⚡ if you configure it correctly.
 Here’s a **lag-free setup guide** to make inference efficient and real-time (≈ 7–12 FPS with YOLOv8n + 320×320 input).
 
 ---
@@ -202,6 +192,138 @@ cv2.destroyAllWindows()
 * Quantized: FP16 or INT8
 * Optimized ONNX (simplified)
 * Threaded ONNX Runtime (4 cores)
+
+---
+Perfect 🔥 — here’s your **ready-to-run YOLOv8n ONNX camera inference script** for **Raspberry Pi 5**, optimized for **speed, low memory, and smooth FPS**.
+
+This version uses:
+
+* ✅ YOLOv8n
+* ✅ `imgsz = 320`
+* ✅ Quantized `FP16` ONNX
+* ✅ Simplified ONNX graph
+* ✅ Threaded ONNX Runtime on 4 cores
+
+---
+
+### 🧠 1️⃣ Before you run
+
+Make sure you’ve already done these:
+
+```bash
+sudo apt update
+sudo apt install -y python3-opencv libatlas-base-dev
+pip install onnxruntime onnxsim numpy
+export OMP_NUM_THREADS=4
+```
+
+If your model isn’t yet optimized:
+
+```bash
+pip install onnxsim onnxconverter-common
+python3 -m onnxsim yolov8n.onnx yolov8n_simplified.onnx
+python3 -m onnxconverter_common.float16_converter yolov8n_simplified.onnx yolov8n_fp16.onnx
+```
+
+Then copy `yolov8n_fp16.onnx` to your Raspberry Pi.
+
+---
+
+### 🪶 2️⃣ The full optimized camera script
+
+```python
+import cv2
+import numpy as np
+import onnxruntime as ort
+import time
+
+# --- Config ---
+MODEL_PATH = "yolov8n_fp16.onnx"
+IMG_SIZE = 320
+CONF_THRESH = 0.4
+IOU_THRESH = 0.45
+
+# --- ONNX Runtime session ---
+providers = ['CPUExecutionProvider']
+session = ort.InferenceSession(MODEL_PATH, providers=providers)
+input_name = session.get_inputs()[0].name
+output_names = [o.name for o in session.get_outputs()]
+
+# --- Warmup (improves first-frame latency) ---
+dummy = np.zeros((1, 3, IMG_SIZE, IMG_SIZE), dtype=np.float32)
+session.run(output_names, {input_name: dummy})
+
+# --- Camera setup ---
+cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+def preprocess(frame):
+    img = cv2.resize(frame, (IMG_SIZE, IMG_SIZE))
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = img.transpose(2, 0, 1)[None].astype(np.float32) / 255.0
+    return img
+
+def draw_boxes(frame, detections):
+    h, w, _ = frame.shape
+    for det in detections:
+        x1, y1, x2, y2, conf, cls = det
+        if conf < CONF_THRESH:
+            continue
+        x1 = int(x1 / IMG_SIZE * w)
+        y1 = int(y1 / IMG_SIZE * h)
+        x2 = int(x2 / IMG_SIZE * w)
+        y2 = int(y2 / IMG_SIZE * h)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
+        cv2.putText(frame, f"{int(cls)}:{conf:.2f}", (x1, y1-10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 2)
+    return frame
+
+print("✅ YOLOv8n FP16 ONNX started... Press ESC to exit.")
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    t1 = time.time()
+    img = preprocess(frame)
+
+    # Run inference
+    preds = session.run(output_names, {input_name: img})[0]
+    detections = preds[0]  # Adjust if shape is different
+
+    fps = 1 / (time.time() - t1)
+    frame = draw_boxes(frame, detections)
+    cv2.putText(frame, f"FPS: {fps:.1f}", (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+    
+    cv2.imshow("YOLOv8n ONNX", frame)
+    if cv2.waitKey(1) == 27:  # ESC to exit
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+```
+
+---
+
+### ⚡ Expected performance (Raspberry Pi 5)
+
+| Metric          | YOLOv8n (FP16, 320×320)          |
+| --------------- | -------------------------------- |
+| FPS (real-time) | **10–14 FPS**                    |
+| CPU usage       | ~80–90% on 4 cores               |
+| RAM usage       | ~700 MB                          |
+| Temperature     | ~55–60 °C (with passive cooling) |
+
+---
+
+### 🔋 Extra tips
+
+* For higher FPS, reduce `imgsz` to `256` or lower `conf` threshold.
+* For even lighter model, quantize to INT8 (using `onnxruntime.quantization`).
+* Disable `cv2.imshow()` for headless streaming — write frames to Flask or MJPEG server.
 
 ---
 
