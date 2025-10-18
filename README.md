@@ -194,8 +194,6 @@ cv2.destroyAllWindows()
 * Threaded ONNX Runtime (4 cores)
 
 ---
-Perfect 🔥 — here’s your **ready-to-run YOLOv8n ONNX camera inference script** for **Raspberry Pi 5**, optimized for **speed, low memory, and smooth FPS**.
-
 This version uses:
 
 * ✅ YOLOv8n
